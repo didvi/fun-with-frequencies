@@ -15,12 +15,7 @@ import skimage as sk
 from skimage import transform
 from skimage import feature
 
-def gauss(img, size=4, sigma=2):
-    """Convolve Image with Gaussian Filter
-    """
-    gauss = cv2.getGaussianKernel(size, sigma) @ cv2.getGaussianKernel(size, sigma).T
-    return convolve2d(img, gauss)
-
+# GRADIENTS
 def dxog(img, size=4, sigma=1):
     gauss = cv2.getGaussianKernel(size, sigma) @ cv2.getGaussianKernel(size, sigma).T
     dog = convolve2d([[1], [-1]], gauss)
@@ -47,12 +42,6 @@ def bool_dy(img, gauss=False, thresh=0.5):
         return np.abs(dyog(img)) > thresh
     return np.abs(dy(img)) > thresh
 
-def crop(img, shape):
-    """Center crops the image into specified shape"""
-    x = (img.shape[0] - shape[0]) // 2
-    y = (img.shape[1] - shape[1]) // 2
-    return img[x:-x, y:-y]
-
 def grad_angle(img):
     """Calculates gradient angle for each pixel in the image
 
@@ -73,7 +62,66 @@ def grad_angle(img):
     # convert to degrees as positive integers
     return np.mod((np.arctan(img_dy / img_dx) * 180 / np.pi).astype(int), 360)
 
+# FREQUENCIES
+def gauss(img, size=4, sigma=2):
+    """Convolve Image with Gaussian Filter
+    """
+    gauss = cv2.getGaussianKernel(size, sigma) @ cv2.getGaussianKernel(size, sigma).T
+    return convolve2d(img, gauss, mode='same')
+
+def high_freq(img, size=4, sigma=2):
+    """Filters out low frequencies in image
+
+    Args:
+        img (np.ndarray): input image, must be 2D
+        size (int, optional): Gaussian kernel size. Defaults to 4.
+        sigma (int, optional): Gaussian sigma. Defaults to 2.
+
+    Returns:
+        np.ndarray: high frequency image
+    """
+    low_freq = gauss(img, size=size, sigma=sigma)
+    return img - low_freq
+
+def log_filter(width, sigma, alpha):
+    # TODO fix this
+    """Calculates the laplacian of the gaussian filter
+
+    Args:
+        width (int): kernel will be of size width x width
+        sigma (double): gaussian sigma
+
+    Returns:
+        np.ndarray: returns filter
+    """
+    gauss = cv2.getGaussianKernel(width, sigma) @ cv2.getGaussianKernel(width, sigma).T
+    kernel = ((1 + alpha) * np.exp(np.ones((width, width)))) - (alpha * gauss)
+    print(kernel)
+    return kernel
+    
+    # f = lambda x, y: -1 / (np.pi * sigma**4) * (1 - ((x**2 + y**2) / 2 * sigma**2)) * np.exp((-1 * (x**2 + y**2) / 2 * sigma**2))
+    # kernel = np.zeros((width, width))
+
+    # for i in range(width):
+    #     for j in range(width):
+    #         kernel[i, j] = f(i, j)
+    
+    # print(kernel)
+    # return kernel
+
+# TRANSFORMATIONS
+def crop(img, shape):
+    """Center crops the image into specified shape"""
+    if img.shape == shape:
+        return img
+
+    x = (img.shape[0] - shape[0])
+    y = (img.shape[1] - shape[1])
+    return img[x // 2:x // 2 - x, y // 2:y // 2 - y]
+
 def rotate(img, end=False):
+    # TODO fix this
+
     img = crop(img, (img.shape[0] - 40, img.shape[1] - 40))
     angles = grad_angle(img)
     # find maximum angle
@@ -87,3 +135,42 @@ def rotate(img, end=False):
     print("Rotating by " + str(max_angle))
     rotated_img = ndi.interpolation.rotate(img, max_angle % 45)
     show(rotated_img)
+
+def sharpen(img, sigma=1, alpha=0.5):
+    # TODO fix this
+    """Sharpens image by alpha value
+
+    Args:
+        img (np.ndarray): input image, must be 2D
+        sigma (int, optional): Gaussian blur sigma. Defaults to 1.
+        alpha (float, optional): Sharpening magnitude. Defaults to 0.5.
+
+    Returns:
+        np.ndarray: sharpened image
+    """
+    print(img.shape)
+    kernel = log_filter(3, sigma, alpha=alpha)
+    img = convolve2d(img, kernel, mode='same')
+    return img
+
+def align(imgs):
+    # TODO
+    return
+
+def combine(high_img, low_img):
+    """Images to combine. First image contributes the high frequency, second image contributes the low frequency.
+
+    Args:
+        imgs (array): Two np arrays. Both 2D.
+
+    Returns:
+        np.ndarray: combined image
+    """
+    high_img = high_freq(high_img)
+    low_img = gauss(low_img)
+
+    shape = (min(high_img.shape[0], low_img.shape[0]), min(high_img.shape[1], low_img.shape[1]))
+
+    high_img = crop(high_img, shape=shape)
+    low_img = crop(low_img, shape=shape)
+    return high_img + low_img

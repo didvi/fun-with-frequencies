@@ -1,5 +1,6 @@
 import skimage as sk
 import skimage.io as skio
+import numpy as np
 
 import os 
 
@@ -15,3 +16,13 @@ def save(img, imname, **kwargs):
     fname = "out/" + '_'.join(fname)
     skio.imsave(fname, img)
     
+def read(img, color=False):
+    # read in the image
+    img = skio.imread(img, as_gray=not color)
+    
+    if not color:
+        img = np.expand_dims(img, axis=2)
+
+    # convert to double
+    img = sk.img_as_float(img)
+    return img
