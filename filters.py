@@ -32,15 +32,18 @@ def dx(img):
 def dy(img):
     return convolve2d(img, [[1, -1]], mode='same')
 
-def bool_dx(img, gauss=False, thresh=0.5):
-    if gauss:
-        return np.abs(dxog(img)) > thresh
-    return np.abs(dx(img)) > thresh
+def grad_magnitude(img, thresh=0.2):
+    img_dx = dx(img)
+    img_dy = dy(img)
+    mag = np.sqrt(np.add(img_dx**2, img_dy**2))
 
-def bool_dy(img, gauss=False, thresh=0.5):
-    if gauss:
-        return np.abs(dyog(img)) > thresh
-    return np.abs(dy(img)) > thresh
+    if thresh:
+        return mag > thresh
+    return mag
+
+def grad_magnitude_gauss(img, thresh=0.05):
+    img = gauss(img)
+    return grad_magnitude(img, thresh=thresh)
 
 def grad_angle(img):
     """Calculates gradient angle for each pixel in the image
@@ -55,15 +58,15 @@ def grad_angle(img):
     img_dy = dy(img)
 
     # remove junk data
-    zero_mask = np.logical_and(bool_dx(img, gauss=True, thresh=0.001), bool_dy(img, gauss=True, thresh=0.001))
+    zero_mask = grad_magnitude_gauss(img)
     img_dx = img_dx[zero_mask]
     img_dy = img_dy[zero_mask]
 
     # convert to degrees as positive integers
-    return np.mod((np.arctan(img_dy / img_dx) * 180 / np.pi).astype(int), 360)
+    return (np.arctan(img_dy / img_dx) * 180 / np.pi).astype(int)
 
 # FREQUENCIES
-def gauss(img, size=10, sigma=4):
+def gauss(img, size=5, sigma=2):
     """Convolve Image with Gaussian Filter
     """
     gauss = cv2.getGaussianKernel(size, sigma) @ cv2.getGaussianKernel(size, sigma).T
