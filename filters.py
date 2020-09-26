@@ -63,13 +63,13 @@ def grad_angle(img):
     return np.mod((np.arctan(img_dy / img_dx) * 180 / np.pi).astype(int), 360)
 
 # FREQUENCIES
-def gauss(img, size=4, sigma=2):
+def gauss(img, size=10, sigma=4):
     """Convolve Image with Gaussian Filter
     """
     gauss = cv2.getGaussianKernel(size, sigma) @ cv2.getGaussianKernel(size, sigma).T
     return convolve2d(img, gauss, mode='same')
 
-def high_freq(img, size=4, sigma=2):
+def high_freq(img, size=5, sigma=2):
     """Filters out low frequencies in image
 
     Args:
@@ -95,19 +95,11 @@ def log_filter(width, sigma, alpha):
         np.ndarray: returns filter
     """
     gauss = cv2.getGaussianKernel(width, sigma) @ cv2.getGaussianKernel(width, sigma).T
-    kernel = ((1 + alpha) * np.exp(np.ones((width, width)))) - (alpha * gauss)
-    print(kernel)
-    return kernel
-    
-    # f = lambda x, y: -1 / (np.pi * sigma**4) * (1 - ((x**2 + y**2) / 2 * sigma**2)) * np.exp((-1 * (x**2 + y**2) / 2 * sigma**2))
-    # kernel = np.zeros((width, width))
+    unit_impulse = np.zeros((width, width))
+    unit_impulse[width // 2, width // 2] = cv2.getGaussianKernel(1, sigma)
+    kernel = ((1 + alpha) * unit_impulse) - (alpha * gauss)
 
-    # for i in range(width):
-    #     for j in range(width):
-    #         kernel[i, j] = f(i, j)
-    
-    # print(kernel)
-    # return kernel
+    return kernel
 
 # TRANSFORMATIONS
 def crop(img, shape):
@@ -136,8 +128,7 @@ def rotate(img, end=False):
     rotated_img = ndi.interpolation.rotate(img, max_angle % 45)
     show(rotated_img)
 
-def sharpen(img, sigma=1, alpha=0.5):
-    # TODO fix this
+def sharpen(img, sigma=2, size=5, alpha=0.5):
     """Sharpens image by alpha value
 
     Args:
@@ -148,10 +139,9 @@ def sharpen(img, sigma=1, alpha=0.5):
     Returns:
         np.ndarray: sharpened image
     """
-    print(img.shape)
-    kernel = log_filter(3, sigma, alpha=alpha)
-    img = convolve2d(img, kernel, mode='same')
-    return img
+    kernel = log_filter(size, sigma, alpha=alpha)
+    sharp_img = convolve2d(img, kernel, mode='same')
+    return sharp_img
 
 def align(imgs):
     # TODO
