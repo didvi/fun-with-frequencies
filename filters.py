@@ -63,11 +63,11 @@ def grad_angle(img):
     Returns:
         np.ndarray: array with the same size of the image
     """
-    img_dx = dx(img)
-    img_dy = dy(img)
+    img_dx = dxog(img)
+    img_dy = dyog(img)
 
     # remove junk data
-    zero_mask = grad_magnitude_gauss(img)
+    zero_mask = img_dx != 0
     img_dx = img_dx[zero_mask]
     img_dy = img_dy[zero_mask]
 
@@ -124,20 +124,23 @@ def crop(img, shape):
     return img[x // 2:x // 2 - x, y // 2:y // 2 - y]
 
 def rotate(img, end=False):
-    # TODO fix this
+    rotation_heuristic = np.zeros(20)
+    for d in range(-10, 10):
+        rotated_img = ndi.interpolation.rotate(img, d)
+        rotated_img = crop(rotated_img, (rotated_img.shape[0] - 40, rotated_img.shape[1] - 40))
 
-    img = crop(img, (img.shape[0] - 40, img.shape[1] - 40))
-    angles = grad_angle(img)
-    # find maximum angle
-    max_angle = np.argmax(np.bincount(angles.flatten())) - 180
+        angles = grad_angle(rotated_img)
+        # count all angles that = 0 mod 90
+        rotation_heuristic[d + 10] = np.sum(np.mod(angles, 90) == 0)
+        print(rotation_heuristic[d + 10])
 
-    # show histogram
-    plt.hist(angles)   
-    plt.show()
+    # # show histogram
+    # plt.hist(angles)   
+    max_angle = np.argmax(rotation_heuristic) - 10
 
     # rotate image
     print("Rotating by " + str(max_angle))
-    rotated_img = ndi.interpolation.rotate(img, max_angle % 45)
+    rotated_img = ndi.interpolation.rotate(img, max_angle)
     show(rotated_img)
 
 def sharpen(img, sigma=2, size=5, alpha=0.5):
