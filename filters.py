@@ -16,12 +16,12 @@ from skimage import transform
 from skimage import feature
 
 # GRADIENTS
-def dxog(img, size=4, sigma=1):
+def dxog(img, size=5, sigma=2):
     gauss = cv2.getGaussianKernel(size, sigma) @ cv2.getGaussianKernel(size, sigma).T
     dog = convolve2d([[1], [-1]], gauss)
     return convolve2d(img, dog, mode='same')
 
-def dyog(img, size=4, sigma=1):
+def dyog(img, size=5, sigma=2):
     gauss = cv2.getGaussianKernel(size, sigma) @ cv2.getGaussianKernel(size, sigma).T
     dog = convolve2d([[1, -1]], gauss)
     return convolve2d(img, dog, mode='same')
@@ -41,9 +41,18 @@ def grad_magnitude(img, thresh=0.2):
         return mag > thresh
     return mag
 
-def grad_magnitude_gauss(img, thresh=0.05):
-    img = gauss(img)
-    return grad_magnitude(img, thresh=thresh)
+def grad_magnitude_gauss(img, thresh=0.05, fast=True):
+    if fast:
+        img_dx = dxog(img)
+        img_dy = dyog(img)
+        mag = np.sqrt(np.add(img_dx**2, img_dy**2))
+
+        if thresh:
+            return mag > thresh
+        return mag
+    else:
+        img = gauss(img)
+        return grad_magnitude(img, thresh=thresh)
 
 def grad_angle(img):
     """Calculates gradient angle for each pixel in the image
