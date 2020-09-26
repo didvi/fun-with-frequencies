@@ -11,19 +11,19 @@ def main(args):
 
     # read in the image
     img = skio.imread(args.img, as_gray=not args.color)
-
+    if not args.color:
+        img = np.expand_dims(img, axis=2)
+    
     # convert to double
     img = sk.img_as_float(img)
 
-    if args.color:
-        for d in range(img.shape[2]):
-            img[:, :, d] = globals()[args.function](img[:, :, d])
-    else:
-        img = globals()[args.function](img)
+    # call function on each image channel
+    for d in range(img.shape[2]):
+        img[:, :, d] = globals()[args.function](img[:, :, d])
+    
 
+    # show image in original format and rgb
     show(img)
-
-    # show image in rgb
     show(sk.img_as_ubyte(img))
 
     toc = time.time()
@@ -36,16 +36,14 @@ if __name__ == "__main__":
     ap.add_argument("-c", "--color", type=bool, default=False)
     ap.add_argument("-f", "--function", default="show")
     ap.add_argument(
-        "-l",
         "--low",
         default="in/guy.jpg",
-        description="Combines low frequencies of this image with high frequencies of the low image.",
+        help="Combines low frequencies of this image with high frequencies of the low image.",
     )
     ap.add_argument(
-        "-h",
         "--high",
         default="in/cat.jpg",
-        description="Combines high frequencies of this image with low frequencies of the low image.",
+        help="Combines high frequencies of this image with low frequencies of the low image.",
     )
     args = ap.parse_args()
 
