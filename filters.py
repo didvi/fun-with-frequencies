@@ -16,23 +16,23 @@ from skimage import transform
 from skimage import feature
 
 # GRADIENTS
-def dxog(img, size=5, sigma=2):
+def dxog(img, size=5, sigma=2, **kwargs):
     gauss = cv2.getGaussianKernel(size, sigma) @ cv2.getGaussianKernel(size, sigma).T
     dog = convolve2d([[1], [-1]], gauss)
     return convolve2d(img, dog, mode='same')
 
-def dyog(img, size=5, sigma=2):
+def dyog(img, size=5, sigma=2, **kwargs):
     gauss = cv2.getGaussianKernel(size, sigma) @ cv2.getGaussianKernel(size, sigma).T
     dog = convolve2d([[1, -1]], gauss)
     return convolve2d(img, dog, mode='same')
 
-def dx(img):
+def dx(img, **kwargs):
     return convolve2d(img, [[1], [-1]], mode='same')
 
-def dy(img):
+def dy(img, **kwargs):
     return convolve2d(img, [[1, -1]], mode='same')
 
-def grad_magnitude(img, thresh=0.2):
+def grad_magnitude(img, size=5, sigma=2, thresh=0.2):
     img_dx = dx(img)
     img_dy = dy(img)
     mag = np.sqrt(np.add(img_dx**2, img_dy**2))
@@ -41,7 +41,7 @@ def grad_magnitude(img, thresh=0.2):
         return mag > thresh
     return mag
 
-def grad_magnitude_gauss(img, thresh=0.05, fast=True):
+def grad_magnitude_gauss(img, size=5, sigma=2, thresh=0.05):
     if fast:
         img_dx = dxog(img)
         img_dy = dyog(img)
@@ -54,7 +54,7 @@ def grad_magnitude_gauss(img, thresh=0.05, fast=True):
         img = gauss(img)
         return grad_magnitude(img, thresh=thresh)
 
-def grad_angle(img):
+def grad_angle(img, size=5, sigma=2, **kwargs):
     """Calculates gradient angle for each pixel in the image
 
     Args:
@@ -63,8 +63,8 @@ def grad_angle(img):
     Returns:
         np.ndarray: array with the same size of the image
     """
-    img_dx = dxog(img)
-    img_dy = dyog(img)
+    img_dx = dxog(img, size=size, sigma=sigma)
+    img_dy = dyog(img, size=size, sigma=sigma)
 
     # remove junk data
     zero_mask = img_dx != 0
@@ -96,7 +96,6 @@ def high_freq(img, size=5, sigma=2):
     return img - low_freq
 
 def log_filter(width, sigma, alpha):
-    # TODO fix this
     """Calculates the laplacian of the gaussian filter
 
     Args:
@@ -108,7 +107,7 @@ def log_filter(width, sigma, alpha):
     """
     gauss = cv2.getGaussianKernel(width, sigma) @ cv2.getGaussianKernel(width, sigma).T
     unit_impulse = np.zeros((width, width))
-    unit_impulse[width // 2, width // 2] = cv2.getGaussianKernel(1, sigma)
+    unit_impulse[width // 2, width // 2] = 1
     kernel = ((1 + alpha) * unit_impulse) - (alpha * gauss)
 
     return kernel
@@ -159,6 +158,10 @@ def sharpen(img, sigma=2, size=5, alpha=0.5):
     """
     kernel = log_filter(size, sigma, alpha=alpha)
     sharp_img = convolve2d(img, kernel, mode='same')
+    
+    # normalize
+    sharp_img = sharp_img - np.min(sharp_img)
+    sharp_img = sharp_img / max(1, np.max(sharp_img))
     return sharp_img
 
 def align(imgs):
