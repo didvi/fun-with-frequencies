@@ -19,6 +19,9 @@ def main(args):
     # show image in original format and rgb
     show(img)
 
+    if args.save:
+        save(img, args.img, sigma=args.sigma, alpha=args.alpha)
+    
     toc = time.time()
     print("Time elapsed: " + str(toc - tic))
 
@@ -30,6 +33,7 @@ if __name__ == "__main__":
     ap.add_argument("-a", "--alpha", type=float, default=0.5)
     ap.add_argument("-s", "--sigma", type=float, default=2)
     ap.add_argument("-k", "--kernel_size", type=int, default=5)
+    ap.add_argument("-s", "--save", type=bool, default=False)
     args = ap.parse_args()
 
     main(args)

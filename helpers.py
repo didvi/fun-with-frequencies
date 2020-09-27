@@ -5,6 +5,9 @@ import numpy as np
 import os 
 
 def show(img):
+    # normalize
+    img = img - np.min(img)
+    img = img / max(1, np.max(img))
     img = sk.img_as_ubyte(img)
     skio.imshow(img)
     skio.show()
