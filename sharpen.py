@@ -33,7 +33,7 @@ if __name__ == "__main__":
     ap.add_argument("-a", "--alpha", type=float, default=0.5)
     ap.add_argument("-s", "--sigma", type=float, default=2)
     ap.add_argument("-k", "--kernel_size", type=int, default=5)
-    ap.add_argument("-s", "--save", type=bool, default=False)
+    ap.add_argument("--save", type=bool, default=False)
     args = ap.parse_args()
 
     main(args)
