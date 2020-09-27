@@ -4,7 +4,6 @@ import time
 from filters import *
 from helpers import *
 
-
 def main(args):
     # timer
     tic = time.time()
@@ -20,12 +19,16 @@ def main(args):
         # check for special function cases
         if args.function == "combine":
             img[:, :, d] = combine(high_img[:, :, d], img[:, :, d])
+        
+        if args.function == 'straighten':
+            img = straighten(img)
+            break
+        
         else:
             img[:, :, d] = globals()[args.function](img[:, :, d])
 
     # show image in original format and rgb
     show(img)
-    show(sk.img_as_ubyte(img))
 
     toc = time.time()
     print("Time elapsed: " + str(toc - tic))

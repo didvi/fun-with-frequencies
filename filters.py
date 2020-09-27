@@ -123,7 +123,8 @@ def crop(img, shape):
     y = (img.shape[1] - shape[1])
     return img[x // 2:x // 2 - x, y // 2:y // 2 - y]
 
-def rotate(img, end=False):
+def find_angle(img):
+    """Finds best angle for 2D image within -10, 10 degree rotation range"""
     rotation_heuristic = np.zeros(20)
     for d in range(-10, 10):
         rotated_img = ndi.interpolation.rotate(img, d)
@@ -137,11 +138,13 @@ def rotate(img, end=False):
     # # show histogram
     # plt.hist(angles)   
     max_angle = np.argmax(rotation_heuristic) - 10
+    return max_angle
 
-    # rotate image
-    print("Rotating by " + str(max_angle))
-    rotated_img = ndi.interpolation.rotate(img, max_angle)
-    show(rotated_img)
+def straighten(img):
+    """Straightens entire image, 3d or 2d"""   
+    angle = find_angle(img[:, :, 0])
+    print("Rotating by " + str(angle))
+    return ndi.interpolation.rotate(img, angle)
 
 def sharpen(img, sigma=2, size=5, alpha=0.5):
     """Sharpens image by alpha value
