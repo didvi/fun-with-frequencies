@@ -240,27 +240,143 @@
             </tr>
         </table>
 
-
-
-
-
-
-
-
-
-
-        <br><br>
-        <table>
+        <p>Now we try to sharpen an image that has been severly blurred. Notice the affect is minimal since there are
+            not many high frequencies, and the effect that we do see is not very good.</p>
+        <table align="center">
             <tr>
                 <td>
-                    <img src="final_imgs/exhaustive_ssd_borderFalse_cathedral.jpg" width="300px" />
+                    <img src="images/sigma_11.0_thresh_0.05_func_gauss_bear.png" width="300px" />
+                    <figcaption>Original image with a sigma 11 blur.</figcaption>
                 </td>
                 <td>
-                    <img src="final_imgs/exhaustive_ssd_borderFalse_monastery.jpg" width="300px" />
+                    <img src="images/sigma_2_alpha_0.7_sigma_11.0_thresh_0.05_func_gauss_bear.png" width="300px" />
+                    <figcaption>Sharpened with an alpha of 0.7</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/high_freq_bear.png" width="300px" />
+                    <figcaption>Just the high frequencies for reference.</figcaption>
                 </td>
             </tr>
         </table>
 
+        <h2>Hybrid images</h2>
+        <p>In this part, we create hybrid images by adding high frequencies from one image, to a low frequency image of
+            another. Here are some examples of the results.</p>
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/sigma_10.0_img2_cat.jpg_guy.jpg" width="300px" />
+                    <figcaption>Image of Derek and his cat.</figcaption>
+                </td>
+                <td>
+                    <img src="images/guy.jpg" width="300px" />
+                    <figcaption>Derek</figcaption>
+                </td>
+                <td>
+                    <img src="images/cat.jpg" width="300px" />
+                    <figcaption>Cat</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/sigma_9.0_img2_bear.png_lion.png" width="300px" />
+                    <figcaption>Image of a bear and a lion. This was a failure since the lion and bear both have high
+                        frequency detail and not much low frequency detail.</figcaption>
+                </td>
+                <td>
+                    <img src="images/bear.png" width="300px" />
+                    <figcaption>A bear.</figcaption>
+                </td>
+                <td>
+                    <img src="images/lion.png" width="300px" />
+                    <figcaption>A lion.</figcaption>
+                </td>
+            </tr>
+        </table>
+        <p>Here is a look into the process of combining these images. We show the images in the fourier domain in order
+            to show the reduction of frequencies much clearer. We also show the laplacian and gaussian stack for these
+            images in order to see which features of the images are being removed/contributed not in the fourier domain.
+        </p>
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/joey_high_freq_sigma6_k11.png" width="300px" />
+                    <figcaption>Joey after removal of low frequencies in the fourier domain</figcaption>
+                </td>
+                <td>
+                    <img src="images/divi_low_sigma9_k11.png" width="300px" />
+                    <figcaption>Divi after blurring in the fourier domain</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/sigma_6.0_img2_divi.png_joey.png" width="300px" />
+                    <figcaption>Divi and Joey.</figcaption>
+                </td>
+                <td>
+                    <img src="images/combined_divi_joey.png" width="300px" />
+                    <figcaption>Divi and Joey in the fourier domain.</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/laplace_stack_divi.png" width="600px" />
+                    <figcaption>Divi's laplace and gaussian stack</figcaption>
+                </td>
+                <td>
+                    <img src="images/laplace_stack_joey.png" width="600px" />
+                    <figcaption>Joey's laplace and gaussian stack.</figcaption>
+                </td>
+            </tr>
+        </table>
+
+        <p>Now to gain more understanding of what these laplacian and gaussian stacks are, we show the stacks for an
+            interesting photo with a lot of high and low frequencies. Notice how different the details are or lack of
+            details are.</p>
+
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/laplace_stack_lincoln_sigma5_k_9.png" width="300px" />
+                    <figcaption>The lincoln painting</figcaption>
+                </td>
+                <td>
+                    <img src="images/laplace_stack_guy_sigma_10_k_11.png" width="300px" />
+                    <figcaption>Derek</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/laplace_stack_bear.png" width="300px" />
+                    <figcaption>Bear.</figcaption>
+                </td>
+            </tr>
+        </table>
+        <br><br>
+
+        <h2>Multiresolution Blending</h2>
+        <p>Here are some examples from the normal multiresolution blending technique.</p>
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/sigma_7_img2_apple.jpeg_function_blend_orange.jpeg" width="300px" />
+                    <figcaption>the orapple</figcaption>
+                </td>
+                <td>
+                    <img src="images/sigma_2_img2_pizza.jpg_function_blend_cheesecake.jpeg" width="300px" />
+                    <figcaption>pizza and cheesecake. I thought it would look more yummy.</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/sigma_7_img2_winter.png_function_blend_forest.png" width="300px" />
+                    <figcaption>multiresolution blending with a different mask. The original mask was rotated and padded
+                        so that it was a diagonal blending. I think it looks better than the other method for this photo.</figcaption>
+                </td>
+            </tr>
+        </table>
         <br><br>
 
 </body>
