@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <style>
+        body {
+            margin: auto;
+            text-align: left;
+            font-weight: 300;
+            font-family: 'Open Sans', sans-serif;
+            color: #121212;
+        }
+
+        div.body-class {
+            padding: 100px;
+            width: 1000px;
+            margin: auto;
+            text-align: left;
+            font-weight: 300;
+            font-family: 'Open Sans', sans-serif;
+            color: #121212;
+        }
+
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+
+        code {
+            background-color: lightgrey;
+        }
+    </style>
+    <title>CS 194</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+    <script
+        type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script>
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML">
+        </script>
+</head>
+
+<body>
+    <br />
+    <div class="body-class">
+        <h1 align="middle">Fun With Frequencies</h1>
+        <h2 align="middle">Divi Schmidt</h2>
+        <br><br>
+
+        <h1>Part 1: Gradients</h1>
+        <p>In this part of the project, we examine one of the simplest but most effective kernels: the finite difference
+            filter. This aids us in many important tasks, including edge detection and straightening.</p>
+        <br>
+        <h2>Gradient Magnitude</h2>
+        <p>For detecting edges, we calculate the magnitude of the gradient for each pixel in the image. We do this by
+            first convolving our image with the Dx and Dy kernels. We then calculate the magnitude at each pixel using
+            this equation. <br><img src='images/grad_mag.png' align='center' width='200px' /><br> We then determine a
+            threshold and take all pixels with a larger magnitude as an edge pixel. Here is the result on the cameraman
+            image.
+        </p>
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/sigma_2_thresh_0.05_func_dx_cameraman.png" width="300px" />
+                    <figcaption>Image after dx convolution.</figcaption>
+                </td>
+                <td>
+                    <img src="images/sigma_2_thresh_0.05_func_dy_cameraman.png" width="300px" />
+                    <figcaption>Image after dy convolution.</figcaption>
+                </td>
+                <td>
+                    <img src="images/filter_grad_magnitude_cameraman.png" width="300px" />
+                    <figcaption>Gradient magnitude thresholded at 0.2</figcaption>
+                </td>
+            </tr>
+        </table>
+        <p>In search of better edge detections, we now turn to gaussian kernels. I first created a gaussian kernel and
+            then convolved my image with it. This gave me a blurrier image which I then calculated the gradient
+            magnitued of. This yielded much better results as shown below.
+        </p>
+
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/filter_grad_magnitude_gauss_cameraman.png" width="300px" />
+                    <figcaption>Gradient magnitude with gaussian blur beforehand.</figcaption>
+                </td>
+            </tr>
+        </table>
+        <p>We can achieve the same effect by convolving a gaussian and the dx and dy kernels first, and then convolving
+            our image with this new kernel. This works because convolutions are associative. Here are the derivative of
+            gaussian filters that I calculated from this method.</p>
+        </p>
+        <br><br>
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/dxog.png" width="300px" />
+                    <figcaption>Convolution with gaussian and dx kernel.</figcaption>
+                </td>
+                <td>
+                    <img src="images/dyog.png" width="300px" />
+                    <figcaption>Convolution with gaussian and dy kernel.</figcaption>
+                </td>
+            </tr>
+        </table>
+
+        <h2>Image Straightening</h2>
+        <p>Now by using these edge detections and gradient calculations, I implemented automatic image straightening. In
+            order to do this, I rotate an image, calculate the angle of the gradient at each pixel, and count how many
+            angles are "good" degrees. Since we like edges to look vertical or horizontal, I counted all 90 degree 180
+            degree and 0 degree angles. After trying rotations within [-10, 10] degrees, I then took the rotation with
+            the highest number of good angles. Here is the result of my straightening function on the facade image.</p>
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/facade.jpg" width="300px" />
+                    <figcaption>Original facade.</figcaption>
+                </td>
+                <td>
+                    <img src="images/facade_straighten.jpg" width="300px" />
+                    <figcaption>Straightened facade. Adjusted by -3 degrees.</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/hist_facade.png" width="300px" />
+                    <figcaption>Original facade histogram.</figcaption>
+                </td>
+                <td>
+                    <img src="images/hist_facade_straight.png" width="300px" />
+                    <figcaption>Straightened facade histogram.</figcaption>
+                </td>
+            </tr>
+        </table>
+        <p>Here are some other examples:</p>
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/pizza.png" width="300px" />
+                    <figcaption>Leaning tower of pizza.</figcaption>
+                </td>
+                <td>
+                    <img src="images/pizza_straight.png" width="300px" />
+                    <figcaption>Straight tower of pizza.</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/hist_pizza.png" width="300px" />
+                    <figcaption>Original pizza histogram.</figcaption>
+                </td>
+                <td>
+                    <img src="images/hist_pizza_straight.png" width="300px" />
+                    <figcaption>Straightened pizza histogram.</figcaption>
+                </td>
+            </tr>
+        </table>
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/tree.png" width="300px" />
+                    <figcaption>Original tree image.</figcaption>
+                </td>
+                <td>
+                    <img src="images/tree_straight.png" width="300px" />
+                    <figcaption>Straightened tree image. Adjusted by 3 degrees.</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/hist_tree.png" width="300px" />
+                    <figcaption>Original tree histogram.</figcaption>
+                </td>
+                <td>
+                    <img src="images/hist_tree_straight.png" width="300px" />
+                    <figcaption>Straightened tree histogram.</figcaption>
+                </td>
+            </tr>
+        </table>
+        <h3>Failure case:</h3>
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/leaning.png" width="300px" />
+                    <figcaption>Original image.</figcaption>
+                </td>
+                <td>
+                    <img src="images/leaning_straight.png" width="300px" />
+                    <figcaption>Incorrectly straightened. Adjusted by -10 degrees.</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/fail.png" width="300px" />
+                    <figcaption>Original image histogram.</figcaption>
+                </td>
+                <td>
+                    <img src="images/fail_straight.png" width="300px" />
+                    <figcaption>"Straightened" image histogram.</figcaption>
+                </td>
+            </tr>
+        </table>
+
+        <h1>Part 2</h1>
+
+        <br><br>
+        <table>
+            <tr>
+                <td>
+                    <img src="final_imgs/exhaustive_ssd_borderFalse_cathedral.jpg" width="300px" />
+                </td>
+                <td>
+                    <img src="final_imgs/exhaustive_ssd_borderFalse_monastery.jpg" width="300px" />
+                </td>
+            </tr>
+        </table>
+
+        <br><br>
+
+</body>
+
+</html>
