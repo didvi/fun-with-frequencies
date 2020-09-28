@@ -204,8 +204,50 @@
                 </td>
             </tr>
         </table>
+        <br><br>
 
         <h1>Part 2</h1>
+        <p>In this part of the project, we delve more into frequencies and having fun with them.</p>
+
+        <h2>Sharpening</h2>
+        <p>First, we show how increasing the higher frequencies of the image can result in a more sharp looking result.
+            Convolving an image with a gaussian kernel will result in a low frequency image. Subtracting our original
+            imace then gives us an image with only high frequencies. This can be added back to our original image in
+            order to achieve the sharpening affect. This can also be done by use of the unsharp masking filter, which
+            performs these same actions in a single convolution. Here is an example of the sharpening affect on the taj
+            mahal.</p>
+
+        <table align="center">
+            <tr>
+                <td>
+                    <img src="images/taj.jpg" width="300px" />
+                    <figcaption>Original image.</figcaption>
+                </td>
+                <td>
+                    <img src="images/sigma_2_alpha_0.1_taj.jpg" width="300px" />
+                    <figcaption>Sharpened with an alpha of 0.1</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/sigma_2_alpha_0.4_taj.jpg" width="300px" />
+                    <figcaption>Sharpened with an alpha of 0.4</figcaption>
+                </td>
+                <td>
+                    <img src="images/sigma_2_alpha_0.7_taj.jpg" width="300px" />
+                    <figcaption>Sharpened with an alpha of 0.7</figcaption>
+                </td>
+            </tr>
+        </table>
+
+
+
+
+
+
+
+
+
 
         <br><br>
         <table>
