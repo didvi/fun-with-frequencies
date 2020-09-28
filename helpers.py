@@ -30,9 +30,9 @@ def save(img, imname, **kwargs):
     """Saves image in images folder with kwargs in image name as {key}_{value}
     """
     # normalize and convert image
-    img = img - np.min(img)
-    img = img / max(1, np.max(img))
-    img = sk.img_as_ubyte(img)
+    # img = img - np.min(img)
+    # img = img / max(1, np.max(img))
+    # img = sk.img_as_ubyte(img)
 
     fname = os.path.basename(imname)
     fname = [str(k) + '_' + str(kwargs[k]) for k in kwargs.keys()] + [fname]

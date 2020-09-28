@@ -86,7 +86,7 @@ def grad_angle(img, size=5, sigma=2, **kwargs):
 
 
 # FREQUENCIES
-def gauss(img, size=5, sigma=2):
+def gauss(img, size=5, sigma=2, **kwargs):
     """Convolve Image with Gaussian Filter"""
     gauss = cv2.getGaussianKernel(size, sigma) @ cv2.getGaussianKernel(size, sigma).T
     return convolve2d(img, gauss, mode="same")
@@ -175,10 +175,7 @@ def sharpen(img, sigma=2, size=5, alpha=0.5):
     """
     kernel = log_filter(size, sigma, alpha=alpha)
     sharp_img = convolve2d(img, kernel, mode="same")
-
-    # normalize
-    sharp_img = sharp_img - np.min(sharp_img)
-    sharp_img = sharp_img / max(1, np.max(sharp_img))
+    show(high_freq(img))
     return sharp_img
 
 def combine(high_img, low_img, sigma=2, size=5):
@@ -203,7 +200,7 @@ def combine(high_img, low_img, sigma=2, size=5):
     plt.show()
     return res
 
-def gauss_laplace_stack(img, sigma=2, size=5, levels=4):
+def gauss_laplace_stack(img, sigma=2, size=5, levels=4, show_plot=True):
     gausses = [img]
     laplaces = [img]
     prev = img
@@ -212,6 +209,49 @@ def gauss_laplace_stack(img, sigma=2, size=5, levels=4):
         gausses.append(img)
         laplaces.append(prev - img)
         prev = img
-    gausses.extend(laplaces)
-    show(gausses)
-    return gausses
+
+    if show_plot:
+        show(gausses + laplaces)
+    return gausses, laplaces
+
+def left_right_mask(shape, sigma=7, size=11):
+    mask = np.expand_dims(np.linspace(1, 0, num=shape[1]), axis=-1)
+    mask = np.tile(mask, shape[0]).T
+    left_masks, _ = gauss_laplace_stack(mask, sigma=sigma, size=size, show_plot=False)
+    
+    mask = np.expand_dims(np.linspace(0, 1, num=shape[1]), axis=-1)
+    mask = np.tile(mask, shape[0]).T
+    right_masks, _ = gauss_laplace_stack(mask, sigma=sigma, size=size, show_plot=False)
+    
+    return left_masks, right_masks
+
+def strange_mask(shape, sigma=7, size=11):
+    mask = np.expand_dims(np.linspace(1, 0, num=shape[1]), axis=-1)
+    mask = np.tile(mask, shape[0]).T
+    mask = ndi.rotate(mask, 30, mode='reflect', reshape=False)
+    left_masks, _ = gauss_laplace_stack(mask, sigma=sigma, size=size, show_plot=False)
+    
+    mask = np.expand_dims(np.linspace(0, 1, num=shape[1]), axis=-1)
+    mask = np.tile(mask, shape[0]).T
+    mask = ndi.rotate(mask, 30, mode='reflect', reshape=False)
+    right_masks, _ = gauss_laplace_stack(mask, sigma=sigma, size=size, show_plot=False)
+    
+    return left_masks, right_masks
+
+def blend(left_img, right_img, sigma=7, size=11):
+    left_masks, right_masks = strange_mask(left_img.shape, sigma=sigma, size=size)
+    
+    # LEFTSIDE
+    _, laplaces = gauss_laplace_stack(left_img, sigma=sigma, size=size, show_plot=False)
+    left = np.multiply(laplaces, left_masks)
+    left = np.sum(left, axis=0)
+
+    # # RIGHT SIDE
+    _, laplaces = gauss_laplace_stack(right_img, sigma=sigma, size=size, show_plot=False)
+    right = np.multiply(laplaces, right_masks)
+    right = np.sum(right, axis=0)
+
+    return np.add(left, right)
+
+
+
