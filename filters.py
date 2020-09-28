@@ -77,6 +77,10 @@ def grad_angle(img, size=5, sigma=2, **kwargs):
     img_dx = img_dx[zero_mask]
     img_dy = img_dy[zero_mask]
 
+    zero_mask = np.sqrt(np.add(img_dx ** 2, img_dy ** 2)) > 0.05
+    img_dx = img_dx[zero_mask]
+    img_dy = img_dy[zero_mask]
+
     # convert to degrees as positive integers
     return (np.arctan(img_dy / img_dx) * 180 / np.pi).astype(int)
 
@@ -131,7 +135,6 @@ def crop(img, shape):
     y = img.shape[1] - shape[1]
     return img[x // 2 : x // 2 - x, y // 2 : y // 2 - y]
 
-
 def find_angle(img):
     """Finds best angle for 2D image within -10, 10 degree rotation range"""
     rotation_heuristic = np.zeros(20)
@@ -147,7 +150,6 @@ def find_angle(img):
         print(rotation_heuristic[d + 10])
 
     # # show histogram
-    # plt.hist(angles)
     max_angle = np.argmax(rotation_heuristic) - 10
     return max_angle
 
@@ -156,7 +158,14 @@ def straighten(img):
     """Straightens entire image, 3d or 2d"""
     angle = find_angle(img[:, :, 0])
     print("Rotating by " + str(angle))
-    return ndi.interpolation.rotate(img, angle)
+    img = ndi.interpolation.rotate(img, angle)
+
+    # plt.hist(grad_angle(img[:, :, 0]))
+    # plt.show()
+    # img = ndi.interpolation.rotate(img, 3)
+    # plt.hist(grad_angle(img[:, :, 0]))
+    # plt.show()
+    return img
 
 
 def sharpen(img, sigma=2, size=5, alpha=0.5):
@@ -177,7 +186,6 @@ def sharpen(img, sigma=2, size=5, alpha=0.5):
     sharp_img = sharp_img - np.min(sharp_img)
     sharp_img = sharp_img / max(1, np.max(sharp_img))
     return sharp_img
-
 
 def combine(high_img, low_img, sigma=2, size=5):
     """Images to combine. First image contributes the high frequency, second image contributes the low frequency.
@@ -200,3 +208,16 @@ def combine(high_img, low_img, sigma=2, size=5):
     plt.imshow(np.log(np.abs(np.fft.fftshift(np.fft.fft2(res)))))
     plt.show()
     return res
+
+def gauss_laplace_stack(img, sigma=2, size=5, levels=4):
+    gausses = [img]
+    laplaces = [img]
+    prev = img
+    for l in range(levels):
+        img = gauss(img, size=size, sigma=sigma)
+        gausses.append(img)
+        laplaces.append(prev - img)
+        prev = img
+    gausses.extend(laplaces)
+    show(gausses)
+    return gausses
