@@ -11,9 +11,6 @@ def main(args):
     # load images
     img = read(args.img, color=args.color)
 
-    if args.high:
-        high_img = read(args.high, args.color)
-
     show(img)
     # call function on each image channel
     for d in range(img.shape[2]):
@@ -24,7 +21,7 @@ def main(args):
     show(img)
 
     if args.save:
-        save(img, args.img, sigma=args.sigma, thresh=args.thresh)
+        save(img, args.img, sigma=args.sigma, thresh=args.thresh, func=args.function)
     
     toc = time.time()
     print("Time elapsed: " + str(toc - tic))
@@ -35,9 +32,9 @@ if __name__ == "__main__":
     ap.add_argument("-i", "--img")
     ap.add_argument("-c", "--color", type=bool, default=False)
     ap.add_argument("-f", "--function", default="grad_magnitude_gauss")
-    ap.add_argument("-k", "--kernel_size", default=5)
-    ap.add_argument("-s", "--sigma", default=2)
-    ap.add_argument("-t", "--thresh", default=0.05)
+    ap.add_argument("-k", "--kernel_size", type=int, default=5)
+    ap.add_argument("-s", "--sigma", type=float, default=2)
+    ap.add_argument("-t", "--thresh", type=float, default=0.05)
     ap.add_argument("--save", type=bool, default=False)
     args = ap.parse_args()
 

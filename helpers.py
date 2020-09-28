@@ -1,17 +1,30 @@
 import skimage as sk
 import skimage.io as skio
 import numpy as np
+import matplotlib.pyplot as plt
 
+from math import ceil
 import os 
 
-def show(img):
-    # normalize
-    img = img - np.min(img)
-    img = img / max(1, np.max(img))
-    img = sk.img_as_ubyte(img)
-    skio.imshow(img)
-    skio.show()
-    return img
+def show(imgs):
+    if isinstance(imgs, list):
+        n_row = 2
+        n_col = ceil(len(imgs) / n_row)
+        
+        _, axs = plt.subplots(n_row, n_col, figsize=(12, 12))
+        axs = axs.flatten()
+        for img, ax in zip(imgs, axs):
+            ax.imshow(img, cmap='gray')
+        plt.show()
+        return imgs
+    else:
+        # normalize
+        imgs = imgs - np.min(imgs)
+        imgs = imgs / max(1, np.max(imgs))
+        imgs = sk.img_as_ubyte(imgs)
+        skio.imshow(imgs)
+        skio.show()
+        return imgs
 
 def save(img, imname, **kwargs):
     """Saves image in images folder with kwargs in image name as {key}_{value}

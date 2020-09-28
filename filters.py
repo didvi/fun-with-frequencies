@@ -159,12 +159,6 @@ def straighten(img):
     angle = find_angle(img[:, :, 0])
     print("Rotating by " + str(angle))
     img = ndi.interpolation.rotate(img, angle)
-
-    # plt.hist(grad_angle(img[:, :, 0]))
-    # plt.show()
-    # img = ndi.interpolation.rotate(img, 3)
-    # plt.hist(grad_angle(img[:, :, 0]))
-    # plt.show()
     return img
 
 
